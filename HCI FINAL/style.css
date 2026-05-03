@@ -1,0 +1,175 @@
+:root {
+    --navy-blue: #1a3b5d;
+    --gold: #ffcc33;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Top Information Bar */
+.top-bar {
+    background-color: var(--navy-blue);
+    color: var(--gold);
+    font-size: 0.85rem;
+}
+
+/* Navbar & Brand */
+.brand-name {
+    color: var(--navy-blue);
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+.brand-tagline {
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    color: #666;
+}
+
+/* NAVIGATION SIGNAGE (ACTIVE STATES) */
+.navbar-nav .nav-link {
+    color: #444 !important;
+    font-weight: 500;
+    padding-bottom: 5px;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--navy-blue) !important;
+}
+
+/* This is the visual indicator for the current page */
+.navbar-nav .nav-link.active {
+    color: var(--navy-blue) !important;
+    font-weight: 700;
+    border-bottom: 2px solid var(--navy-blue);
+}
+
+.btn-navy {
+    background-color: var(--navy-blue);
+    color: white;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+/* Hero Section */
+.hero-section {
+    height: 180px;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    border-top: 5px solid var(--navy-blue);
+    border-bottom: 5px solid var(--navy-blue);
+}
+.search-box-container {
+    max-width: 650px;
+    background: white;
+    padding: 8px;
+    border-radius: 50px;
+}
+.search-box-container input {
+    border-radius: 50px 0 0 50px !important;
+    padding-left: 20px;
+}
+.btn-navy-search {
+    background-color: var(--navy-blue);
+    color: white;
+    border-radius: 0 50px 50px 0 !important;
+}
+
+/* Clickable Card Interactivity */
+.product-card, .part-card {
+    border: 1px solid #eee;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: #fff;
+}
+
+.product-card:hover, .part-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+    border-color: var(--navy-blue);
+}
+
+.product-card img, .part-card img {
+    height: 200px;
+    object-fit: cover;
+}
+
+.section-title {
+    font-family: 'Playfair Display', serif;
+    letter-spacing: 2px;
+    font-size: 1.5rem;
+}
+
+.card-title, .part-title {
+    font-size: 1rem;
+    color: #333;
+    font-weight: 700;
+}
+
+.btn-navy-sm {
+    background-color: var(--navy-blue);
+    color: white;
+    font-size: 0.75rem;
+    padding: 6px 15px;
+    border-radius: 8px;
+}
+
+/* Parts Page Styles */
+.parts-main-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    letter-spacing: 2px;
+}
+
+.part-desc {
+    font-size: 0.85rem;
+    color: #666;
+    line-height: 1.4;
+}
+
+.text-navy {
+    color: var(--navy-blue);
+}
+
+/* Footer Styling */
+.footer-dark {
+    background-color: #1a3b5d;
+}
+
+.footer-heading {
+    letter-spacing: 1px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: #fff;
+}
+
+.btn-footer-action {
+    background-color: #5c7287;
+    color: white;
+    font-size: 0.85rem;
+    border: none;
+    text-align: left;
+    padding: 10px 15px;
+}
+
+.text-gold {
+    color: #ffcc33;
+}
+
+.small-footer-text {
+    font-size: 0.75rem;
+    line-height: 1.5;
+    margin-bottom: 10px;
+}
+
+.tracking-widest {
+    letter-spacing: 3px;
+}
