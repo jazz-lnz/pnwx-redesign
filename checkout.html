@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | Cascadia X-Ray Supplies</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        body { background: #f2f4f7; }
+
+        /* ── Two-panel shell ─────────────────────────────────── */
+        .checkout-shell {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            min-height: calc(100vh - 110px);
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .checkout-left  { padding: 1.75rem 2rem 2rem 1.5rem; overflow-y: auto; }
+
+        .checkout-right {
+            background: #fff;
+            border-left: 1px solid #e4e7ec;
+            position: sticky;
+            top: 0;
+            height: calc(100vh - 110px);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .checkout-right-inner {
+            padding: 1.75rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.1rem;
+            flex: 1;
+        }
+
+        /* ── Step bar ────────────────────────────────────────── */
+        .step-bar { display: flex; align-items: center; margin-bottom: 1.4rem; }
+        .step-item {
+            display: flex; align-items: center; gap: 0.4rem;
+            font-size: 0.76rem; font-weight: 700;
+            letter-spacing: 0.06em; text-transform: uppercase; color: #aab0b8;
+        }
+        .step-item.active { color: var(--navy-blue); }
+        .step-item.done   { color: #2b8b4c; }
+        .step-dot {
+            width: 22px; height: 22px; border-radius: 50%;
+            background: #dde1e7; color: #888;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; font-weight: 700; flex-shrink: 0;
+        }
+        .step-item.active .step-dot { background: var(--navy-blue); color: #fff; }
+        .step-item.done   .step-dot { background: #2b8b4c; color: #fff; }
+        .step-line { flex: 1; height: 2px; background: #dde1e7; margin: 0 0.5rem; max-width: 40px; }
+
+        /* ── Accordion sections ──────────────────────────────── */
+        .co-section {
+            background: #fff; border-radius: 12px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+            margin-bottom: 0.85rem; overflow: hidden;
+        }
+        .co-section-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.85rem 1.2rem;
+            border-bottom: 1px solid #eef0f3;
+            cursor: pointer; user-select: none;
+        }
+        .co-section-title {
+            font-size: 0.84rem; font-weight: 700;
+            color: var(--navy-blue);
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .co-body { padding: 1rem 1.2rem; }
+        .co-chevron { font-size: 0.82rem; color: #bbb; transition: transform 0.2s; }
+        .co-section.collapsed .co-chevron { transform: rotate(-90deg); }
+        .done-badge {
+            font-size: 0.7rem; font-weight: 700; color: #2b8b4c;
+            display: none; align-items: center; gap: 0.3rem;
+        }
+        .co-section.is-done .done-badge { display: flex; }
+
+        /* ── Form ────────────────────────────────────────────── */
+        .form-label { font-size: 0.77rem; font-weight: 700; color: #555; margin-bottom: 0.2rem; }
+        .form-control, .form-select {
+            border-radius: 7px; border-color: #c8ccd2; font-size: 0.86rem; padding: 0.38rem 0.65rem;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--navy-blue); box-shadow: 0 0 0 0.16rem rgba(26,59,93,0.13);
+        }
+        .req { color: #dc3545; margin-left: 1px; }
+
+        /* Address type pills */
+        .addr-pills { display: flex; gap: 0.45rem; margin-bottom: 0.85rem; }
+        .addr-pill {
+            flex: 1; padding: 0.38rem 0.6rem;
+            border: 1.5px solid #d0d5dc; border-radius: 8px;
+            font-size: 0.77rem; font-weight: 700; color: #888;
+            text-align: center; cursor: pointer; transition: all 0.15s;
+        }
+        .addr-pill.active { border-color: var(--navy-blue); color: var(--navy-blue); background: #f0f4f8; }
+
+        /* Payment tabs */
+        .pay-tabs { display: flex; gap: 0.45rem; margin-bottom: 0.9rem; }
+        .pay-tab {
+            flex: 1; padding: 0.5rem 0.4rem;
+            border: 1.5px solid #d0d5dc; border-radius: 9px;
+            text-align: center; cursor: pointer;
+            font-size: 0.73rem; font-weight: 700; color: #888;
+            transition: all 0.15s; background: #fff;
+        }
+        .pay-tab i { display: block; font-size: 1.1rem; margin-bottom: 0.12rem; }
+        .pay-tab.active { border-color: var(--navy-blue); color: var(--navy-blue); background: #f0f4f8; }
+
+        /* Card input */
+        .card-wrap { position: relative; }
+        .card-wrap input { padding-right: 50px; }
+        .card-wrap .card-icon {
+            position: absolute; right: 10px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 1rem; opacity: 0.5; color: var(--navy-blue);
+        }
+
+        .info-box {
+            background: #f0f4f8;
+            border-left: 4px solid var(--navy-blue);
+            border-radius: 8px; padding: 0.75rem 0.9rem;
+            font-size: 0.8rem; color: #4a5568; line-height: 1.5;
+        }
+
+        /* ── Right panel ─────────────────────────────────────── */
+        .right-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.05rem; color: var(--navy-blue);
+        }
+
+        .order-item {
+            display: flex; align-items: flex-start; gap: 0.6rem;
+            padding: 0.6rem 0; border-bottom: 1px solid #f0f2f4;
+        }
+        .order-item:last-child { border-bottom: none; }
+        .order-item-img {
+            width: 42px; height: 42px; border-radius: 7px;
+            background: #eef0f3; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            color: #bbb; font-size: 0.95rem;
+        }
+        .order-item-name { font-size: 0.8rem; font-weight: 700; color: #333; line-height: 1.3; }
+        .order-item-sub  { font-size: 0.71rem; color: #888; margin-top: 1px; }
+        .order-item-price { margin-left: auto; font-size: 0.82rem; font-weight: 700; color: var(--navy-blue); white-space: nowrap; }
+
+        .sum-row {
+            display: flex; justify-content: space-between;
+            font-size: 0.83rem; color: #555; margin-bottom: 0.4rem;
+        }
+        .sum-row.total {
+            font-size: 0.97rem; font-weight: 700; color: #222;
+            border-top: 2px solid #eef0f3; padding-top: 0.5rem; margin-top: 0.2rem;
+        }
+        .freight-note { font-size: 0.71rem; color: #999; font-style: italic; margin-top: 0.25rem; }
+
+        .btn-place-order {
+            width: 100%; background: var(--navy-blue); color: #fff;
+            font-weight: 700; font-size: 0.92rem; border: none;
+            border-radius: 10px; padding: 0.78rem 1.5rem;
+            letter-spacing: 0.03em; transition: background 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+        }
+        .btn-place-order:hover { background: #14304a; }
+
+        .security-row {
+            display: flex; gap: 0.9rem; font-size: 0.71rem;
+            color: #777; justify-content: center; flex-wrap: wrap;
+        }
+        .security-row span { display: flex; align-items: center; gap: 0.28rem; }
+
+        textarea.form-control { resize: vertical; min-height: 60px; }
+
+        /* ── Mobile: stack ───────────────────────────────────── */
+        @media (max-width: 860px) {
+            .checkout-shell { grid-template-columns: 1fr; }
+            .checkout-right { position: static; height: auto; border-left: none; border-top: 1px solid #e4e7ec; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="navbar-container"></div>
+
+    <!-- Breadcrumb bar -->
+    <div style="background:#fff;border-bottom:1px solid #e4e7ec;">
+        <div style="max-width:1280px;margin:0 auto;padding:0.55rem 1rem;">
+            <ol class="breadcrumb mb-0" style="font-size:0.78rem;">
+                <li class="breadcrumb-item"><a href="index.html" class="text-decoration-none text-muted">Home</a></li>
+                <li class="breadcrumb-item"><a href="cart.html" class="text-decoration-none text-muted">Cart</a></li>
+                <li class="breadcrumb-item active">Checkout</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="checkout-shell">
+
+        <!-- ═══ LEFT: Forms ═══ -->
+        <div class="checkout-left">
+
+            <div class="step-bar">
+                <div class="step-item done">
+                    <div class="step-dot"><i class="bi bi-check" style="font-size:0.82rem"></i></div>Cart
+                </div>
+                <div class="step-line"></div>
+                <div class="step-item active">
+                    <div class="step-dot">2</div>Checkout
+                </div>
+                <div class="step-line"></div>
+                <div class="step-item">
+                    <div class="step-dot">3</div>Confirmation
+                </div>
+            </div>
+
+            <!-- Delivery Address -->
+            <div class="co-section" id="sec-delivery">
+                <div class="co-section-header" onclick="toggleSection('sec-delivery')">
+                    <div class="co-section-title"><i class="bi bi-geo-alt"></i> Delivery Address</div>
+                    <div style="display:flex;align-items:center;gap:0.7rem;">
+                        <div class="done-badge"><i class="bi bi-check-circle-fill"></i> Saved</div>
+                        <i class="bi bi-chevron-down co-chevron"></i>
+                    </div>
+                </div>
+                <div class="co-body">
+                    <div class="addr-pills">
+                        <div class="addr-pill active" id="pill-business" onclick="setAddrType('business')">
+                            <i class="bi bi-building me-1"></i>Business
+                        </div>
+                        <div class="addr-pill" id="pill-residence" onclick="setAddrType('residence')">
+                            <i class="bi bi-house me-1"></i>Residence
+                        </div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-7">
+                            <label class="form-label">Company Name <span class="req">*</span></label>
+                            <input type="text" class="form-control" placeholder="e.g. City Radiology Center" id="company-name">
+                        </div>
+                        <div class="col-5">
+                            <label class="form-label">Contact Name <span class="req">*</span></label>
+                            <input type="text" class="form-control" placeholder="Full name" id="contact-name">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">ATTN <span class="text-muted fw-normal">(Dept. or person)</span></label>
+                            <input type="text" class="form-control" placeholder="e.g. Radiology Dept.">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Street Address <span class="req">*</span></label>
+                            <input type="text" class="form-control" placeholder="Street address">
+                        </div>
+                        <div class="col-5">
+                            <label class="form-label">City <span class="req">*</span></label>
+                            <input type="text" class="form-control">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label">State <span class="req">*</span></label>
+                            <select class="form-select">
+                                <option>OR</option><option>WA</option><option>CA</option>
+                                <option>ID</option><option>MT</option><option>AK</option>
+                                <option>HI</option><option>NY</option><option>TX</option>
+                            </select>
+                        </div>
+                        <div class="col-3">
+                            <label class="form-label">ZIP <span class="req">*</span></label>
+                            <input type="text" class="form-control" maxlength="10">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Phone at Address <span class="req">*</span></label>
+                            <input type="tel" class="form-control" placeholder="(503) 000-0000">
+                        </div>
+                        <div class="col-6" id="closing-time-wrap">
+                            <label class="form-label">Closing Time <span class="text-muted fw-normal">(if before 5 PM)</span></label>
+                            <input type="time" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Confirmation Email <span class="req">*</span></label>
+                            <input type="email" class="form-control" placeholder="you@hospital.org" id="email">
+                            <div class="form-text" style="font-size:0.71rem;">Used only for order confirmation and paid invoice.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Billing Address -->
+            <div class="co-section" id="sec-billing">
+                <div class="co-section-header" onclick="toggleSection('sec-billing')">
+                    <div class="co-section-title"><i class="bi bi-receipt"></i> Billing Address</div>
+                    <div style="display:flex;align-items:center;gap:0.7rem;">
+                        <div class="done-badge" id="billing-badge"><i class="bi bi-check-circle-fill"></i> Same as delivery</div>
+                        <i class="bi bi-chevron-down co-chevron"></i>
+                    </div>
+                </div>
+                <div class="co-body">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="same-as-delivery" checked onchange="toggleBilling(this)">
+                        <label class="form-check-label" for="same-as-delivery" style="font-size:0.84rem;">Same as delivery address</label>
+                    </div>
+                    <div id="billing-fields" style="display:none;">
+                        <div class="row g-2 mt-1">
+                            <div class="col-12">
+                                <label class="form-label">ATTN</label>
+                                <input type="text" class="form-control" placeholder="Billing dept. or contact">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Street Address <span class="req">*</span></label>
+                                <input type="text" class="form-control">
+                            </div>
+                            <div class="col-5">
+                                <label class="form-label">City <span class="req">*</span></label>
+                                <input type="text" class="form-control">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label">State <span class="req">*</span></label>
+                                <select class="form-select">
+                                    <option>OR</option><option>WA</option><option>CA</option>
+                                </select>
+                            </div>
+                            <div class="col-3">
+                                <label class="form-label">ZIP <span class="req">*</span></label>
+                                <input type="text" class="form-control" maxlength="10">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment -->
+            <div class="co-section" id="sec-payment">
+                <div class="co-section-header" onclick="toggleSection('sec-payment')">
+                    <div class="co-section-title"><i class="bi bi-credit-card"></i> Payment Method</div>
+                    <div style="display:flex;align-items:center;gap:0.7rem;">
+                        <div class="done-badge"><i class="bi bi-check-circle-fill"></i> Saved</div>
+                        <i class="bi bi-chevron-down co-chevron"></i>
+                    </div>
+                </div>
+                <div class="co-body">
+                    <div class="pay-tabs">
+                        <div class="pay-tab active" onclick="selectPayment('card', this)">
+                            <i class="bi bi-credit-card-2-front"></i>Credit Card
+                        </div>
+                        <div class="pay-tab" onclick="selectPayment('po', this)">
+                            <i class="bi bi-file-earmark-text"></i>Purchase Order
+                        </div>
+                        <div class="pay-tab" onclick="selectPayment('check', this)">
+                            <i class="bi bi-bank"></i>Check / ACH
+                        </div>
+                    </div>
+
+                    <div id="payment-card">
+                        <div class="alert alert-warning py-2 mb-2" style="font-size:0.77rem;">
+                            <i class="bi bi-info-circle me-1"></i>
+                            A <strong>0.04% transaction fee</strong> applies to credit card payments.
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-12">
+                                <label class="form-label">Card Number <span class="req">*</span></label>
+                                <div class="card-wrap">
+                                    <input type="text" class="form-control" placeholder="0000 0000 0000 0000" maxlength="19" oninput="formatCardNumber(this)">
+                                    <i class="bi bi-credit-card card-icon"></i>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label">Expiry <span class="req">*</span></label>
+                                <input type="text" class="form-control" placeholder="MM/YY" maxlength="5" oninput="formatExpiry(this)">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label">CVV <span class="req">*</span></label>
+                                <input type="text" class="form-control" placeholder="000" maxlength="4">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label">Daytime Phone <span class="req">*</span></label>
+                                <input type="tel" class="form-control" placeholder="(503) 000-0000">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Name on Card <span class="req">*</span></label>
+                                <input type="text" class="form-control" placeholder="As it appears on card">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="payment-po" style="display:none;">
+                        <div class="info-box mb-2">
+                            <strong>Purchase Orders</strong> accepted with approved credit accounts.
+                            Min. opening order: <strong>$500</strong>.
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label">PO Number <span class="req">*</span></label>
+                                <input type="text" class="form-control" placeholder="PO-2026-XXXX">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Authorized By</label>
+                                <input type="text" class="form-control" placeholder="Approver name">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="payment-check" style="display:none;">
+                        <div class="info-box">
+                            <strong>Check / Money Order / ACH:</strong> Call <strong>(800)-827-9729</strong> before submitting so we can advise you of freight charges to include in your payment.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Notes -->
+            <div class="co-section">
+                <div class="co-section-header" style="cursor:default;border-bottom:none;">
+                    <div class="co-section-title">
+                        <i class="bi bi-chat-left-text"></i> Order Notes
+                        <span class="text-muted fw-normal ms-1" style="font-size:0.75rem;">— Optional</span>
+                    </div>
+                </div>
+                <div class="co-body" style="padding-top:0;">
+                    <textarea class="form-control" rows="2" placeholder="Customization, size, color, or special instructions..."></textarea>
+                    <div class="form-text" style="font-size:0.71rem;">Use this for product customizations previously noted on the order form (size, color, etc.)</div>
+                </div>
+            </div>
+
+        </div><!-- /checkout-left -->
+
+
+        <!-- ═══ RIGHT: Summary + Place Order ═══ -->
+        <div class="checkout-right">
+            <div class="checkout-right-inner">
+
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="right-title">Order Summary</div>
+                    <a href="cart.html" class="text-decoration-none" style="font-size:0.76rem;color:var(--navy-blue);">
+                        <i class="bi bi-pencil me-1"></i>Edit cart
+                    </a>
+                </div>
+
+                <!-- Items -->
+                <div id="checkout-items"></div>
+
+                <hr class="my-0">
+
+                <!-- Totals -->
+                <div>
+                    <div class="sum-row">
+                        <span>Subtotal</span>
+                        <span id="checkout-subtotal">$0.00</span>
+                    </div>
+                    <div class="sum-row">
+                        <span>
+                            Freight
+                            <i class="bi bi-question-circle text-muted ms-1"
+                               style="font-size:0.78rem;cursor:pointer;"
+                               data-bs-toggle="tooltip"
+                               title="Varies by weight & size. Confirmed before your card is charged."></i>
+                        </span>
+                        <span class="text-muted fst-italic" style="font-size:0.8rem;">TBD</span>
+                    </div>
+                    <div class="sum-row" id="cc-fee-row">
+                        <span>Credit Card Fee (0.04%)</span>
+                        <span id="checkout-cc-fee">$0.00</span>
+                    </div>
+                    <div class="sum-row total">
+                        <span>Estimated Total</span>
+                        <span id="checkout-total">$0.00</span>
+                    </div>
+                    <p class="freight-note">Final total confirmed within 1 business day before charging.</p>
+                </div>
+
+                <hr class="my-0">
+
+                <!-- CTA -->
+                <div>
+                    <button class="btn-place-order mb-2" onclick="placeOrder()">
+                        <i class="bi bi-lock-fill"></i> Place Order
+                    </button>
+                    <div class="security-row">
+                        <span><i class="bi bi-shield-lock-fill text-success"></i> Encrypted &amp; secure</span>
+                        <span><i class="bi bi-credit-card-fill" style="color:var(--navy-blue)"></i> Visa · MC · Disc · Amex</span>
+                    </div>
+                </div>
+
+                <!-- Phone fallback -->
+                <div class="info-box" style="font-size:0.76rem;margin-top:auto;">
+                    <i class="bi bi-telephone me-1"></i>
+                    Prefer to order by phone?<br>
+                    <strong>(800)-827-9729</strong> &nbsp;·&nbsp; Mon–Fri, 8am–6pm PT
+                </div>
+
+            </div>
+        </div><!-- /checkout-right -->
+
+    </div><!-- /checkout-shell -->
+
+    <div id="footer-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/load-components.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+            renderCheckoutItems();
+            // update if cart changes in other views
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'pnwx-cart') {
+                    renderCheckoutItems();
+                }
+            });
+            // also prefer session-stored selected items when present
+            window.addEventListener('focus', function() {
+                renderCheckoutItems();
+            });
+        });
+
+        function renderCheckoutItems() {
+            // Prefer session-selected payload if present (set when clicking Proceed on cart)
+            const sessionSelected = (() => {
+                try { return JSON.parse(sessionStorage.getItem('pnwx-selected-checkout') || 'null'); } catch (e) { return null; }
+            })();
+
+            const cartItems = getCartItems();
+            let selectedItems = [];
+            if (Array.isArray(sessionSelected) && sessionSelected.length) {
+                // Use session payload (match by id against local cart to ensure fresh prices)
+                const ids = sessionSelected.map(i => i.id);
+                selectedItems = cartItems.filter(i => ids.includes(i.id));
+            } else {
+                selectedItems = cartItems.filter(item => item.selected !== false);
+            }
+            const checkoutItemsContainer = document.getElementById('checkout-items');
+            
+            if (!selectedItems.length) {
+                checkoutItemsContainer.innerHTML = '<div class="text-center text-muted py-3" style="font-size:0.85rem;">No items selected for checkout</div>';
+                document.getElementById('checkout-subtotal').textContent = '$0.00';
+                document.getElementById('checkout-cc-fee').textContent = '$0.00';
+                document.getElementById('checkout-total').textContent = '$0.00';
+                return;
+            }
+            
+            checkoutItemsContainer.innerHTML = selectedItems.map(item => {
+                const lineTotal = item.price * item.quantity;
+                return `
+                    <div class="order-item">
+                        <div class="order-item-img"><i class="bi bi-image"></i></div>
+                        <div class="flex-grow-1">
+                            <div class="order-item-name">${item.title}</div>
+                            <div class="order-item-sub">${item.sku ? `Stock #${item.sku}` : ''} ${item.variation ? `· ${item.variation}` : ''} · Qty: ${item.quantity}</div>
+                        </div>
+                        <div class="order-item-price">${formatCurrency(item.price)}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            const subtotal = selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const fee = subtotal * 0.0004;
+            const total = subtotal + fee;
+            
+            document.getElementById('checkout-subtotal').textContent = formatCurrency(subtotal);
+            document.getElementById('checkout-cc-fee').textContent = formatCurrency(fee);
+            document.getElementById('checkout-total').textContent = formatCurrency(total);
+        }
+
+        function toggleSection(id) {
+            const el = document.getElementById(id);
+            const body = el.querySelector('.co-body');
+            const collapsed = el.classList.toggle('collapsed');
+            body.style.display = collapsed ? 'none' : 'block';
+        }
+
+        function setAddrType(type) {
+            document.getElementById('pill-business').classList.toggle('active', type === 'business');
+            document.getElementById('pill-residence').classList.toggle('active', type === 'residence');
+            document.getElementById('closing-time-wrap').style.display = type === 'business' ? '' : 'none';
+        }
+
+        function toggleBilling(cb) {
+            document.getElementById('billing-fields').style.display = cb.checked ? 'none' : 'block';
+            const badge = document.getElementById('billing-badge');
+            badge.innerHTML = cb.checked
+                ? '<i class="bi bi-check-circle-fill"></i> Same as delivery'
+                : '<i class="bi bi-check-circle-fill"></i> Saved';
+        }
+
+        function selectPayment(method, el) {
+            document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            ['card','po','check'].forEach(m => {
+                document.getElementById('payment-' + m).style.display = m === method ? 'block' : 'none';
+            });
+            document.getElementById('cc-fee-row').style.display = method === 'card' ? '' : 'none';
+            recalcTotal(method);
+        }
+
+        function formatCardNumber(input) {
+            let v = input.value.replace(/\D/g,'').substring(0,16);
+            input.value = v.replace(/(.{4})/g,'$1 ').trim();
+        }
+        function formatExpiry(input) {
+            let v = input.value.replace(/\D/g,'').substring(0,4);
+            if (v.length >= 2) v = v.substring(0,2) + '/' + v.substring(2);
+            input.value = v;
+        }
+
+        function recalcTotal(method) {
+            const cartItems = getCartItems();
+            const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const fee = method === 'card' ? subtotal * 0.0004 : 0;
+            document.getElementById('checkout-cc-fee').textContent = formatCurrency(fee);
+            document.getElementById('checkout-total').textContent = formatCurrency(subtotal + fee);
+        }
+
+        function placeOrder() {
+            // Clear checked-out items from cart
+            const cart = JSON.parse(localStorage.getItem('pnwx-cart') || '[]');
+            const selectedCheckout = JSON.parse(sessionStorage.getItem('pnwx-selected-checkout') || '[]');
+            
+            if (selectedCheckout.length) {
+                const checkedOutIds = selectedCheckout.map(item => item.id);
+                const updatedCart = cart.filter(item => !checkedOutIds.includes(item.id));
+                localStorage.setItem('pnwx-cart', JSON.stringify(updatedCart));
+            }
+            
+            // Store order info and redirect
+            const orderNum = 'CXR-' + Date.now().toString().slice(-6);
+            sessionStorage.setItem('orderNumber', orderNum);
+            sessionStorage.setItem('orderEmail', document.getElementById('email').value || 'your email');
+            sessionStorage.setItem('orderName', document.getElementById('contact-name').value || 'Customer');
+            window.location.href = 'confirmation.html';
+        }
+    </script>
+</body>
+</html>

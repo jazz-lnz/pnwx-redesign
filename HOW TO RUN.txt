@@ -1,0 +1,14 @@
+PNWX-Redesign - How to Run
+
+This project is a static HTML website.
+
+How to run:
+1. Open the PNWX-Redesign project folder.
+2. Open index.html in your web browser.
+3. You can also open any of the other HTML pages the same way.
+
+Notes:
+- The main page is index.html.
+- style.css is located in assets/css/.
+- Images are located in assets/images/.
+- No local server is required for the navbar and footer to load.

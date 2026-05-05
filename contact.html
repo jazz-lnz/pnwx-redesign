@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | PNWX</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="bg-light contact-page">
+
+    <!-- Navbar Container -->
+    <div id="navbar-container"></div>
+
+    <!-- Breadcrumb bar -->
+    <div style="background:#fff;border-bottom:1px solid #e4e7ec;">
+        <div style="max-width:1280px;margin:0 auto;padding:0.55rem 1rem;">
+            <ol class="breadcrumb mb-0" style="font-size:0.78rem;">
+                <li class="breadcrumb-item"><a href="index.html" class="text-decoration-none text-muted">Home</a></li>
+                <li class="breadcrumb-item active">Contact Us</li>
+            </ol>
+        </div>
+    </div>
+
+    <main class="container py-4 py-lg-5">
+        <div class="row g-4 align-items-start">
+            <div class="col-lg-8">
+                <h1 class="contact-title mb-2">Contact Us</h1>
+                <p class="contact-lead mb-4">Use the form below for product questions, order help, billing issues, or general support. We usually reply within 1 business day.</p>
+
+                <div class="bg-white rounded-3 shadow-sm border p-4 p-lg-5">
+                    <form>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="fullName" class="form-label fw-semibold">Full Name</label>
+                                <input type="text" class="form-control" id="fullName" placeholder="John Smith" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label fw-semibold">Email Address</label>
+                                <input type="email" class="form-control" id="email" placeholder="john@example.com" required>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="company" class="form-label fw-semibold">Company Name</label>
+                                <input type="text" class="form-control" id="company" placeholder="Your Hospital/Clinic">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="subject" class="form-label fw-semibold">Subject</label>
+                                <select class="form-select" id="subject" required>
+                                    <option value="">Select a subject</option>
+                                    <option value="product">Product Inquiry</option>
+                                    <option value="order">Order Question</option>
+                                    <option value="technical">Technical Support</option>
+                                    <option value="billing">Billing Issue</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="message" class="form-label fw-semibold">Message</label>
+                            <textarea class="form-control" id="message" rows="5" placeholder="Tell us how we can help..." required></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                                <label class="form-check-label small" for="agreeTerms">
+                                    I agree to be contacted about my inquiry.
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-navy px-4 py-2">
+                            <i class="bi bi-send me-2"></i> Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="bg-white rounded-3 shadow-sm border p-4 contact-side-panel">
+                    <h2 class="contact-side-title mb-3">Before you send</h2>
+                    <p class="small text-muted mb-3">Including these details helps us answer faster:</p>
+                    <ul class="small text-muted ps-3 mb-4">
+                        <li>Product name or part number</li>
+                        <li>Order number, if you have one</li>
+                        <li>Any sizes, variations, or specs</li>
+                    </ul>
+                    <div class="border-top pt-3 small text-muted">
+                        <div class="fw-semibold text-dark mb-1">Typical response time</div>
+                        <div>1 business day</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Container -->
+    <div id="footer-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/load-components.js"></script>
+</body>
+</html>
