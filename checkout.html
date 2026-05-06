@@ -547,7 +547,9 @@
                 const lineTotal = item.price * item.quantity;
                 return `
                     <div class="order-item">
-                        <div class="order-item-img"><i class="bi bi-image"></i></div>
+                        <div class="order-item-img">
+                            ${item.image ? `<img src="${item.image}" alt="${item.title}" style="width:100%;height:100%;object-fit:cover;border-radius:7px;" onerror="this.style.display='none';this.parentElement.innerHTML='<i class=\\'bi bi-image\\'></i>'">` : '<i class="bi bi-image"></i>'}
+                        </div>
                         <div class="flex-grow-1">
                             <div class="order-item-name">${item.title}</div>
                             <div class="order-item-sub">${item.sku ? `Stock #${item.sku}` : ''} ${item.variation ? `· ${item.variation}` : ''} · Qty: ${item.quantity}</div>
@@ -588,6 +590,11 @@
         }
 
         function selectPayment(method, el) {
+            // HCI Principle: Feedback & Error Prevention
+            // When user switches payment method, immediately update:
+            // 1. Visual indicator (which tab is active)
+            // 2. Form sections (show/hide relevant payment fields)
+            // 3. Order total (add/remove fee based on method)
             document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
             ['card','po','check'].forEach(m => {
@@ -608,15 +615,47 @@
         }
 
         function recalcTotal(method) {
+            // BUG FIX: Payment mode switching broke total calculation
+            // PROBLEM: Original code calculated total from all cart items
+            //          When user switched payment modes, it recalculated from entire cart
+            //          not just selected items → wrong total displayed
+            // 
+            // SOLUTION: Extract selectedItems the SAME WAY renderCheckoutItems() does
+            //           This ensures consistency: items displayed = items used in calculation
+            //
+            // Data source priority:
+            // 1. sessionStorage 'pnwx-selected-checkout' (items selected in cart.html)
+            // 2. Fallback to localStorage items with selected flag true
+            // 3. This matches renderCheckoutItems() data flow exactly
+            //
+            // HCI Principle: Consistency
+            // Users see items listed in order summary, so total MUST match those items
+            // Any mismatch breaks trust in the system
+            //
+            // See docs/DESIGN_DECISIONS.md "Payment Total Calculation" for testing friction point
+            
+            const sessionSelected = (() => {
+                try { return JSON.parse(sessionStorage.getItem('pnwx-selected-checkout') || 'null'); } catch (e) { return null; }
+            })();
             const cartItems = getCartItems();
-            const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            let selectedItems = [];
+            if (Array.isArray(sessionSelected) && sessionSelected.length) {
+                const ids = sessionSelected.map(i => i.id);
+                selectedItems = cartItems.filter(i => ids.includes(i.id));
+            } else {
+                selectedItems = cartItems.filter(item => item.selected !== false);
+            }
+            const subtotal = selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const fee = method === 'card' ? subtotal * 0.0004 : 0;
             document.getElementById('checkout-cc-fee').textContent = formatCurrency(fee);
             document.getElementById('checkout-total').textContent = formatCurrency(subtotal + fee);
         }
 
         function placeOrder() {
-            // Clear checked-out items from cart
+            // Data Flow: Checkout → Order Data Storage → Confirmation Page
+            // 
+            // Step 1: Clear checked-out items from cart
+            // Why: User should see empty cart after checkout (mental model alignment)
             const cart = JSON.parse(localStorage.getItem('pnwx-cart') || '[]');
             const selectedCheckout = JSON.parse(sessionStorage.getItem('pnwx-selected-checkout') || '[]');
             
@@ -626,7 +665,9 @@
                 localStorage.setItem('pnwx-cart', JSON.stringify(updatedCart));
             }
             
-            // Store order info and redirect
+            // Step 2: Store order info in sessionStorage for confirmation page
+            // Confirmation page will read this to display order number, email, and items
+            // See docs/MODULE_ARCHITECTURE.md "Guarantee 4: Order Confirmation Accuracy"
             const orderNum = 'CXR-' + Date.now().toString().slice(-6);
             sessionStorage.setItem('orderNumber', orderNum);
             sessionStorage.setItem('orderEmail', document.getElementById('email').value || 'your email');

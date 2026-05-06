@@ -1,3 +1,9 @@
+// ========================================
+// COMPONENT SYNCHRONIZATION MODULE
+// Centralized navbar, footer, search, and cart logic
+// See docs/MODULE_ARCHITECTURE.md for sync guarantees
+// ========================================
+
 const navbarHomeHtml = `
     <!-- TOP NAV BAR -->
     <div class="top-bar text-center py-1">
@@ -106,7 +112,7 @@ const footerHtml = `
                     <a href="assets/OrderForm.pdf" class="btn btn-footer-action w-100 mb-2">
                         <i class="bi bi-download me-2"></i> Download Order Form
                     </a>
-                    <a href="#" class="btn btn-footer-action w-100 mb-3">
+                    <a href="order-policies.html" class="btn btn-footer-action w-100 mb-3" style="pointer-events: auto;">
                         <i class="bi bi-printer me-2"></i> Fax Your Order - 1-503-666-8855
                     </a>
                     <p class="small text-white mb-2" style="font-weight: 600;">WE ACCEPT</p>
@@ -178,6 +184,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function setActiveLink(currentPage) {
+    // HCI Principle: Feedback & Visibility
+    // Users need clear indication of current location (Nielsen's 10 usability heuristics)
+    // Testing friction point: Multiple category buttons stayed highlighted on consecutive clicks
+    // Fix: Always clear all hash-based links FIRST, then apply active to current
+    // This ensures only ONE navbar link is active at any time
+    // See docs/DESIGN_DECISIONS.md for iteration history
+    
     const activePageMap = {
         category: 'parts',
         collimator: 'parts',
@@ -195,7 +208,25 @@ function setActiveLink(currentPage) {
             link.classList.remove('active');
         }
     });
+
+    // Always clear all hash-based links first (error prevention pattern)
+    // This prevents accumulation of active states
+    document.querySelectorAll('a[href^="product-types.html#"]').forEach(link => link.classList.remove('active'));
+
+    if (currentPage === 'product-types') {
+        const currentHash = window.location.hash || '#equipment';
+        const hashLink = document.querySelector(`a[href="product-types.html${currentHash}"]`);
+        if (hashLink) {
+            hashLink.classList.add('active');
+        }
+    }
 }
+
+// Re-evaluate nav highlighting when hash changes (for product-types.html categories)
+window.addEventListener('hashchange', function() {
+    const currentPage = window.location.pathname.split('/').pop().replace('.html', '') || 'index';
+    setActiveLink(currentPage);
+});
 
 const CART_STORAGE_KEY = 'pnwx-cart';
 
@@ -530,6 +561,26 @@ function buildSearchIndex() {
     return index;
 }
 
+function resolveCartItemListingPage(item) {
+    if (item && item.listingPage) {
+        return item.listingPage;
+    }
+
+    const title = String(item && item.title ? item.title : '').toLowerCase();
+    const sku = String(item && item.sku ? item.sku : '').toLowerCase();
+    const text = `${title} ${sku}`;
+
+    if (text.includes('grid')) {
+        return 'xray-grids';
+    }
+
+    if (text.includes('collimator')) {
+        return 'collimator';
+    }
+
+    return 'collimator';
+}
+
 function renderCart() {
     const cartBody = document.getElementById('cart-items-body');
     const subtotalElement = document.getElementById('cart-subtotal');
@@ -573,7 +624,7 @@ function renderCart() {
             'collimator': 'collimator.html',
             'xray-grids': 'xray-grids.html'
         };
-        const productLink = listingPageMap[item.listingPage] || '#';
+        const productLink = listingPageMap[resolveCartItemListingPage(item)] || '#';
         
         // Build variation selector HTML
         let variationSelectHtml = '';
@@ -663,6 +714,9 @@ function removeFromCart(cartId) {
 }
 
 function getCartItems() {
+    // Synchronization Point: Single source of truth for cart state
+    // All cart reads must use this function to ensure consistency
+    // See docs/MODULE_ARCHITECTURE.md for "Guarantee 1: Cart State Consistency"
     try {
         return JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || '[]');
     } catch (error) {
@@ -677,7 +731,10 @@ function formatCurrency(value) {
     }).format(value || 0);
 }
 
-// Handle proceed-to-checkout: persist selected items before navigation and block when disabled
+// HCI Principle: Error Prevention
+// Users cannot proceed to checkout if no items are selected
+// This constraint is enforced here (no disabled check → prevented by aria-disabled)
+// See docs/USABILITY_PATTERNS.md for "Constraint & Affordance" pattern
 document.addEventListener('click', function(e) {
     const el = e.target.closest('#proceed-to-checkout');
     if (!el) return;
@@ -687,7 +744,11 @@ document.addEventListener('click', function(e) {
         return;
     }
 
-    // persist selected items to sessionStorage for checkout page to prefer
+    // Data Flow: Cart selection → sessionStorage
+    // sessionStorage used instead of localStorage for checkout because:
+    // - sessionStorage clears on tab close (intentional)
+    // - Prevents users from accidentally checking out previous session
+    // See docs/MODULE_ARCHITECTURE.md for "Guarantee 3: Checkout Data Consistency"
     const selected = getCartItems().filter(i => i.selected !== false);
     sessionStorage.setItem('pnwx-selected-checkout', JSON.stringify(selected));
 });

@@ -512,6 +512,18 @@
     padding: 10px 15px;
 }
 
+.btn-footer-action:hover {
+    background-color: #5c7287;
+    color: white;
+    text-decoration: none;
+}
+
+.btn-footer-action:focus {
+    background-color: #5c7287;
+    color: white;
+    box-shadow: none;
+}
+
 .text-gold {
     color: #ffcc33;
 }

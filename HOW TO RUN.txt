@@ -1,14 +1,44 @@
-PNWX-Redesign - How to Run
+How to run the PNWX-Redesign site (local preview)
 
-This project is a static HTML website.
+Overview
+- The site is a static HTML/CSS/JS project. Files are self-contained under the project root.
+- To preview the interface, open the HTML files directly in a web browser (no server required for this UI/UX work). Any modern desktop browser is suitable. Use Developer Tools (Console / Application) to inspect storage keys and debug scripts.
 
-How to run:
-1. Open the PNWX-Redesign project folder.
-2. Open index.html in your web browser.
-3. You can also open any of the other HTML pages the same way.
+Open the site
+1. Using the file manager or terminal, open `index.html` in a modern browser (Chrome, Firefox, Safari).
+	- Example (macOS Terminal):
+	  cd "/Users/jesslanuzo/Documents/3A 2ND SEM/HCI/FINALS/PNWX-Redesign"
+	  open index.html
+2. Any other page can be opened the same way (e.g., `cart.html`, `checkout.html`, `confirmation.html`).
 
-Notes:
-- The main page is index.html.
-- style.css is located in assets/css/.
-- Images are located in assets/images/.
-- No local server is required for the navbar and footer to load.
+Basic test checklist (quick validation)
+1. Open `index.html` and confirm the navbar appears.
+2. *Search for a product or open Product Types → add an item to cart.
+3. Open `cart.html` and verify the item appears and the checkbox selection works.
+4. Click Proceed to Checkout: selected items should populate the checkout summary (right column).
+5. Switch payment method (Card ↔ PO/Check) and confirm totals update correctly.
+6. Place Order and verify `confirmation.html` shows the order number and selected items.
+
+Notes on demonstration vs production*
+- This project is a UI/UX demonstration. The checkout flow uses client-side storage (sessionStorage/localStorage) to simulate order creation.
+- The product database in `js/products.js` contains a LIMITED SET OF EXAMPLE PRODUCTS included to demonstrate the basic workflow and key features; it is not a full catalog. Products included: Collimator and X-Ray Grids type under Parts Category.
+- For production use, replace client-side storage with a server-side order API and secure payment integration.
+
+
+
+Key localStorage / sessionStorage keys
+- `pnwx-cart` (localStorage) – persistent cart contents
+- `pnwx-selected-checkout` (sessionStorage) – items saved for the active checkout
+- `orderNumber`, `orderEmail`, `orderName` (sessionStorage) – confirmation fields saved by checkout
+
+Editing files during development
+- Edit HTML/CSS/JS files in the project folder and refresh the browser to see changes.
+- If a script change does not apply, clear the browser cache or open Developer Tools → Network → Disable cache while DevTools is open.
+
+Troubleshooting
+- If items do not appear in cart or totals seem incorrect, open Console and inspect localStorage/sessionStorage keys.
+- If scripts fail to load, confirm `js/products.js` and `js/load-components.js` are present and referenced in the HTML in the correct order.
+
+Contact points in the site (manual order options)
+- `order-policies.html` – fax, phone, and mailing address details remain available as manual ordering alternatives.
+
